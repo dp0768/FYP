@@ -21,15 +21,16 @@ os.chdir(os.getcwd()+"\FYP\CODE")
 warnings.filterwarnings("ignore")  # suppress numpy ComplexWarning
 
 #Show graphs
-Show_potential = True
-Show_transmission = True
-Show_cross_section = True
-Show_Carrier_dist = True
-Sim_Analysis = True
-Sim_Analysis_2 = True
-FILM_Psi_real= True
-FILM_Psi_PDF= True
-Show_init_psi = True
+Show_potential = False
+Show_transmission = False
+Show_cross_section = False
+Show_Carrier_dist = False
+Sim_Analysis = False
+Sim_Analysis_2 = False
+FILM_Psi_real= False
+FILM_Psi_PDF= False
+Show_init_psi = False
+Norm_analysis = False 
 
 #Plotting colors
 # Experimental - circles, Black, no  connecting line
@@ -230,7 +231,7 @@ def V_analysis(SIM=False, i_V=False):
         ax.yaxis.set_major_locator(MaxNLocator(integer=True))
         plt.legend()
         plt.grid()
-        plt.savefig('Potentials_LOW.png',dpi=100,bbox_inches='tight',)
+        plt.savefig('Potentials_HIGH.png',dpi=200,bbox_inches='tight',)
         #plt.show()
 
     if Show_transmission == True: 
@@ -283,7 +284,7 @@ def V_analysis(SIM=False, i_V=False):
         plt.legend(loc='lower right')
         plt.grid()
         #plt.subplots_adjust(bottom=0.12,right=0.983,top=0.964,left=0.098)
-        plt.savefig('Cross_Section_High.png',dpi=1000,bbox_inches='tight',)
+        plt.savefig('Cross_Section_High.png',dpi=200,bbox_inches='tight',)
         #plt.show()   
         
     if Show_Carrier_dist == True:
@@ -331,7 +332,7 @@ def V_analysis(SIM=False, i_V=False):
         plt.legend()
         plt.grid()
         #plt.savefig('Carrier_dist.png',dpi=1000)
-        plt.savefig('Carrier_dist_High.png',dpi=1000,bbox_inches='tight',)
+        plt.savefig('Carrier_dist_High.png',dpi=200,bbox_inches='tight',)
         #plt.show()
 
     if Sim_Analysis == True:
@@ -369,7 +370,7 @@ def V_analysis(SIM=False, i_V=False):
         ax.set_xlim(left=55,right=70)
         plt.legend()
         plt.grid()
-        plt.savefig('Tran_prob_low.png',dpi=100,bbox_inches='tight',)
+        plt.savefig('Tran_prob_HIGH.png',dpi=300,bbox_inches='tight',)
         #plt.show(
             
     if Sim_Analysis_2 == True:
@@ -409,7 +410,7 @@ def V_analysis(SIM=False, i_V=False):
         ax.set_xlim(left=55,right=70)
         plt.legend()
         plt.grid()
-        plt.savefig('Prob_FUS_DIFFFFF',dpi=100,bbox_inches='tight',)
+        plt.savefig('Prob_FUS_DIFFFFF_HIGH',dpi=300,bbox_inches='tight',)
         #plt.show()
 
 
@@ -505,10 +506,12 @@ def Main():
         quit()
 
     #Array of Energies to simulate over
-    Emax = 70
-    Emin = 55
-    n = int(Emax-Emin) + 1    
-    E_SIM = np.linspace(Emin,Emax,n,endpoint=True,dtype=int)
+    #Emax = 70
+    #Emin = 55
+    #n = int(Emax-Emin) + 1    
+    #E_SIM = np.linspace(Emin,Emax,n,endpoint=True,dtype=int)
+    n=1
+    E_SIM = np.array([62])
 
     #Loop to simulate system over range at energies
     for k in range(n):
@@ -550,10 +553,30 @@ def Main():
             T_SIM[j] = 1 - NORM_SIM
             
             #Energy Expectation value Calculation
-            for i in range(1,nr-1):
-                Sec_Der[i] = Psi_FD_Sol[j,i+1] - 2 * Psi_FD_Sol[j,i] +Psi_FD_Sol[j,i-1]     
-            E_expectation[j] = np.sum(np.conjugate(Psi_FD_Sol[j,:]) * (( - Sec_Der[:] / (HMC*mu_macron) + Psi_FD_Sol[j,:] * V_total) * dr))
-            
+            #for i in range(1,nr-1):
+            #    Sec_Der[i] = Psi_FD_Sol[j,i+1] - 2 * Psi_FD_Sol[j,i] +Psi_FD_Sol[j,i-1]     
+            #E_expectation[j] = np.sum(np.conjugate(Psi_FD_Sol[j,:]) * (( - Sec_Der[:] / (HMC*mu_macron) + Psi_FD_Sol[j,:] * V_total) * dr))
+
+        if Norm_analysis == True:
+            plt.figure(figsize=(30,20))
+            plt.rcParams.update({'font.size': 36})
+            plt.rcParams.update({'lines.linewidth' : 4})
+            fig=plt.gcf()
+            ax=fig.add_subplot(111)
+            ax.plot(t_save,T_SIM, ls='--',color='red')
+            ax.text(0.8,0.355,'Max $P_{fus}$ = ' + f'{np.round(np.max(T_SIM),3)}  '+ 
+                    '\nFinal $P_{fus}$ = ' + f'{np.round(T_SIM[-1],3)}  ' + 
+                    '\nMax difference $P_{fus}$ = ' + f'{np.round(((np.max(T_SIM)-T_SIM[-1])/np.max(T_SIM))*100,2)} %  ',
+                    fontsize=36, bbox=dict(facecolor='white',edgecolor='black'))
+            ax.set_ylabel('Probability of Fusion')
+            ax.set_xlabel('Time ($10^{-22}$ s)')
+            ax.set_ylim(bottom=0,top=0.4)
+            ax.set_xlim(left=t_min,right=t_max)
+            plt.grid()
+            #plt.show()
+            plt.savefig('Probs_fus_evolution_HIGH',dpi=300,bbox_inches='tight')
+            quit()
+
         
         if FILM_Psi_real == True:
             def init():  
@@ -670,5 +693,5 @@ def Main():
 
 
     
-V_analysis()
-Main()
+#V_analysis()
+#Main()
